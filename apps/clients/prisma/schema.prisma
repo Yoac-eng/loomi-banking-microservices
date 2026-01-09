@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum LedgerEntryType {
+  CREDIT
+  DEBIT
+}
+
+model User {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fullName          String    @map("full_name") @db.VarChar
+  email             String    @unique @db.VarChar
+  address           String?   @db.Text
+  profilePictureUrl String?   @map("profile_picture_url") @db.VarChar
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  bankingDetails BankingDetails?
+  auditLogs      ClientAuditLog[]
+
+  @@map("users")
+}
+
+model BankingDetails {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String   @unique @map("user_id") @db.Uuid
+  agency        String   @db.VarChar
+  accountNumber String   @unique @map("account_number") @db.VarChar
+  balanceCents  Int      @default(0) @map("balance_cents")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ledgerEntries LedgerEntry[]
+
+  @@map("banking_details")
+}
+
+model LedgerEntry {
+  id            String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  bankingId     String          @map("banking_id") @db.Uuid
+  transactionId String          @map("transaction_id") @db.Uuid
+  amountCents   Int             @map("amount_cents")
+  type          LedgerEntryType
+  description   String?         @db.VarChar
+  createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamp(6)
+
+  bankingDetails BankingDetails @relation(fields: [bankingId], references: [id], onDelete: Cascade)
+
+  @@map("ledger_entries")
+}
+
+model ClientAuditLog {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  action       String   @db.VarChar
+  changedFields Json    @map("changed_fields") @db.JsonB
+  ipAddress    String?  @map("ip_address") @db.VarChar
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("client_audit_logs")
+}
