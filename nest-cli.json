@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/loomi-back-challenge/src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/loomi-back-challenge/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/loomi-back-challenge",
+  "projects": {
+    "clients": {
+      "type": "application",
+      "root": "apps/clients",
+      "entryFile": "main",
+      "sourceRoot": "apps/clients/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/clients/tsconfig.app.json"
+      }
+    },
+    "loomi-back-challenge": {
+      "type": "application",
+      "root": "apps/loomi-back-challenge",
+      "entryFile": "main",
+      "sourceRoot": "apps/loomi-back-challenge/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/loomi-back-challenge/tsconfig.app.json"
+      }
+    },
+    "transactions": {
+      "type": "application",
+      "root": "apps/transactions",
+      "entryFile": "main",
+      "sourceRoot": "apps/transactions/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/transactions/tsconfig.app.json"
+      }
+    }
+  }
+}

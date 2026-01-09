@@ -1,0 +1,119 @@
+version: '3.8'
+
+services:
+  # PostgreSQL for Clients Service
+  postgres-clients:
+    image: postgres:16-alpine
+    container_name: loomi-postgres-clients
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-loomi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-loomi123}
+      POSTGRES_DB: ${POSTGRES_DB_CLIENTS:-loomi_clients}
+    ports:
+      - "${POSTGRES_CLIENTS_PORT:-5432}:5432"
+    volumes:
+      - postgres-clients-data:/var/lib/postgresql/data
+    networks:
+      - loomi-network
+
+  # PostgreSQL for Transactions Service
+  postgres-transactions:
+    image: postgres:16-alpine
+    container_name: loomi-postgres-transactions
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-loomi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-loomi123}
+      POSTGRES_DB: ${POSTGRES_DB_TRANSACTIONS:-loomi_transactions}
+    ports:
+      - "${POSTGRES_TRANSACTIONS_PORT:-5433}:5432"
+    volumes:
+      - postgres-transactions-data:/var/lib/postgresql/data
+    networks:
+      - loomi-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: loomi-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - loomi-network
+
+  # RabbitMQ Message Broker
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: loomi-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-loomi}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-loomi123}
+    ports:
+      - "${RABBITMQ_AMQP_PORT:-5672}:5672"   # AMQP port
+      - "${RABBITMQ_MGMT_PORT:-15672}:15672" # Management UI
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - loomi-network
+
+  # Clients Microservice
+  clients-service:
+    build:
+      context: .
+      dockerfile: apps/clients/Dockerfile
+    container_name: loomi-clients-service
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      port: ${CLIENTS_PORT:-3000}
+      DATABASE_URL_CLIENTS: postgresql://${POSTGRES_USER:-loomi}:${POSTGRES_PASSWORD:-loomi123}@postgres-clients:5432/${POSTGRES_DB_CLIENTS:-loomi_clients}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-loomi}:${RABBITMQ_PASSWORD:-loomi123}@rabbitmq:5672
+    ports:
+      - "${CLIENTS_PORT:-3000}:3000"
+    networks:
+      - loomi-network
+    depends_on:
+      - postgres-clients
+      - redis
+
+  # Transactions Microservice
+  transactions-service:
+    build:
+      context: .
+      dockerfile: apps/transactions/Dockerfile
+    container_name: loomi-transactions-service
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      port: ${TRANSACTIONS_PORT:-3001}
+      DATABASE_URL_TRANSACTIONS: postgresql://${POSTGRES_USER:-loomi}:${POSTGRES_PASSWORD:-loomi123}@postgres-transactions:5432/${POSTGRES_DB_TRANSACTIONS:-loomi_transactions}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-loomi}:${RABBITMQ_PASSWORD:-loomi123}@rabbitmq:5672
+      CLIENTS_SERVICE_URL: http://clients-service:3000
+    ports:
+      - "${TRANSACTIONS_PORT:-3001}:3001"
+    networks:
+      - loomi-network
+    depends_on:
+      - postgres-transactions
+      - redis
+      - rabbitmq
+      - clients-service
+
+networks:
+  loomi-network:
+    driver: bridge
+    name: loomi-network
+
+volumes:
+  postgres-clients-data:
+    name: loomi-postgres-clients-data
+  postgres-transactions-data:
+    name: loomi-postgres-transactions-data
+  redis-data:
+    name: loomi-redis-data
+  rabbitmq-data:
+    name: loomi-rabbitmq-data
+
