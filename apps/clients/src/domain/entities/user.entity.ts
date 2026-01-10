@@ -14,10 +14,10 @@ interface UserProps {
   updatedAt?: Date;
 }
 
+// User is the aggregate root, BankingDetails is an entity
 export class User {
   private readonly _id: string;
   private readonly _props: UserProps;
-  // User is the aggregate root, BankingDetails is an entity
   private _bankingDetails?: BankingDetails;
 
   constructor(props: UserProps, id?: string) {

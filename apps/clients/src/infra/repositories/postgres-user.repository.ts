@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { BankingDetails } from '../../domain/entities/banking-details.entity';
 import { User } from '../../domain/entities/user.entity';
 import { AccountType } from '../../domain/enum/account-type.enum';
-import { IUserRepository } from '../../domain/interfaces/repositories/user.repository.interface';
+import type { IUserRepository } from '../../domain/interfaces/repositories/user.repository.interface';
 import { Email } from '../../domain/value-objects/email.value-object';
 import { prisma } from '../lib/prisma';
 
@@ -23,7 +23,7 @@ export class PostgresUserRepository implements IUserRepository {
     });
   }
 
-  async update(user: User): Promise<void> {
+  async updateFinancials(user: User): Promise<void> {
     const data = this.mapToPrismaData(user);
 
     await prisma.user.update({
@@ -39,6 +39,22 @@ export class PostgresUserRepository implements IUserRepository {
               },
             }
           : undefined,
+      },
+    });
+  }
+
+  async updateProfile(user: User): Promise<void> {
+    const data = this.mapToPrismaData(user);
+
+    // apenas atualiza a tabela User
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        fullName: data.fullName,
+        email: data.email,
+        address: data.address,
+        profilePictureUrl: data.profilePictureUrl,
+        updatedAt: data.updatedAt,
       },
     });
   }
