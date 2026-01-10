@@ -1,12 +1,11 @@
 import { User } from '../../entities/user.entity';
 
 export interface IUserRepository {
-  create(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User>;
+  create(user: User): Promise<void>;
+  updateFinancials(user: User): Promise<void>;
+  updateProfile(user: User): Promise<void>;
   findById(id: string): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
-  update(
-    id: string,
-    data: Partial<Omit<User, 'id' | 'createdAt'>>,
-  ): Promise<User>;
+  findByIdWithBankingDetails(id: string): Promise<User | null>;
   delete(id: string): Promise<void>;
 }
