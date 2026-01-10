@@ -46,7 +46,7 @@ O projeto está dividido em duas aplicações principais dentro da pasta `apps/`
 O "Core Banking" do sistema.
 - **Responsabilidades:** Gestão de identidade, dados bancários e a "Fonte da Verdade" financeira.
 - **Features Chave:**
-  - Gerenciamento de saldo via **Ledger** (Partida Dobrada: Withdraw/Deposit).
+  - Gerenciamento de saldo via **Ledger** (Partida Dobrada: Credit/Debit).
   - Cache de dados de usuário com **Redis** para alta disponibilidade.
   - Auditoria de alterações cadastrais.
 
