@@ -8,7 +8,7 @@ interface BankingDetailsProps {
   accountNumber: string;
   accountType: AccountType;
   balanceCents: number;
-  updatedAt: Date;
+  updatedAt?: Date;
 }
 
 export class BankingDetails {
@@ -18,6 +18,7 @@ export class BankingDetails {
   constructor(props: BankingDetailsProps, id?: string) {
     this._id = id ?? randomUUID();
     this._props = props;
+    this._props.updatedAt = this._props.updatedAt ?? new Date();
   }
 
   get id(): string {
@@ -44,8 +45,8 @@ export class BankingDetails {
     return this._props.balanceCents;
   }
 
-  get updatedAt(): Date {
-    return this._props.updatedAt;
+  get updatedAt(): Date | null {
+    return this._props.updatedAt ?? null;
   }
 
   public toJson(): Record<string, unknown> {
@@ -69,6 +70,23 @@ export class BankingDetails {
       throw new Error('Insufficient balance');
     }
     this._props.balanceCents -= amountCents;
+    this._props.updatedAt = new Date();
+  }
+
+  updateDetails(data: {
+    agency?: string;
+    accountNumber?: string;
+    accountType?: AccountType;
+  }): void {
+    if (data.agency !== undefined) {
+      this._props.agency = data.agency;
+    }
+    if (data.accountNumber !== undefined) {
+      this._props.accountNumber = data.accountNumber;
+    }
+    if (data.accountType !== undefined) {
+      this._props.accountType = data.accountType;
+    }
     this._props.updatedAt = new Date();
   }
 }

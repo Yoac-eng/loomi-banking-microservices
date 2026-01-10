@@ -1,63 +1,68 @@
 import { Injectable } from '@nestjs/common';
 
+import { BankingDetails } from '../../domain/entities/banking-details.entity';
 import { User } from '../../domain/entities/user.entity';
-import {
-  CreateUserData,
-  UpdateUserData,
-  IUserRepository,
-} from '../../domain/interfaces/repositories/user.repository.interface';
+import { AccountType } from '../../domain/enum/account-type.enum';
+import { IUserRepository } from '../../domain/interfaces/repositories/user.repository.interface';
 import { Email } from '../../domain/value-objects/email.value-object';
 import { prisma } from '../lib/prisma';
 
 @Injectable()
 export class PostgresUserRepository implements IUserRepository {
-  async create(user: CreateUserData): Promise<User> {
-    const created = await prisma.user.create({
+  async create(user: User): Promise<void> {
+    const data = this.mapToPrismaData(user);
+
+    await prisma.user.create({
       data: {
-        fullName: user.fullName,
-        email: user.email.toString(),
-        address: user.address ?? null,
-        profilePictureUrl: user.profilePictureUrl ?? null,
+        ...data,
+        // Se tiver banking details, cria junto numa query só
+        bankingDetails: user.hasBankingDetails()
+          ? { create: this.mapToPrismaBankingData(user.bankingDetails) }
+          : undefined,
       },
     });
-    return this.toDomainEntity(created);
+  }
+
+  async update(user: User): Promise<void> {
+    const data = this.mapToPrismaData(user);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        ...data,
+        updatedAt: new Date(),
+        bankingDetails: user.hasBankingDetails()
+          ? {
+              update: {
+                ...this.mapToPrismaBankingData(user.bankingDetails),
+                updatedAt: new Date(),
+              },
+            }
+          : undefined,
+      },
+    });
   }
 
   async findById(id: string): Promise<User | null> {
-    const found = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id },
     });
-    if (!found) return null;
-    return this.toDomainEntity(found);
+    return user ? this.toDomainEntity(user) : null;
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const found = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email },
     });
-    if (!found) return null;
-    return this.toDomainEntity(found);
+    return user ? this.toDomainEntity(user) : null;
   }
 
-  async update(id: string, data: UpdateUserData): Promise<User> {
-    const updateData: Record<string, unknown> = {};
-    if (data.fullName !== undefined) {
-      updateData.fullName = data.fullName;
-    }
-    if (data.email !== undefined) {
-      updateData.email = data.email.toString();
-    }
-    if (data.address !== undefined) {
-      updateData.address = data.address;
-    }
-    if (data.profilePictureUrl !== undefined) {
-      updateData.profilePictureUrl = data.profilePictureUrl;
-    }
-    const updated = await prisma.user.update({
+  async findByIdWithBankingDetails(id: string): Promise<User | null> {
+    const user = await prisma.user.findUnique({
       where: { id },
-      data: updateData,
+      include: { bankingDetails: true },
     });
-    return this.toDomainEntity(updated);
+    return user ? this.toDomainEntityWithBankingDetails(user) : null;
   }
 
   async delete(id: string): Promise<void> {
@@ -86,5 +91,65 @@ export class PostgresUserRepository implements IUserRepository {
       },
       prismaUser.id,
     );
+  }
+
+  private toDomainEntityWithBankingDetails(prismaUser: {
+    id: string;
+    fullName: string;
+    email: string;
+    address: string | null;
+    profilePictureUrl: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+    bankingDetails: {
+      id: string;
+      userId: string;
+      agency: string;
+      accountNumber: string;
+      accountType: 'CHECKING' | 'SAVINGS';
+      balanceCents: number;
+      updatedAt: Date;
+    } | null;
+  }): User {
+    const user = this.toDomainEntity(prismaUser);
+    if (prismaUser.bankingDetails) {
+      const bd = new BankingDetails(
+        {
+          userId: prismaUser.bankingDetails.userId,
+          agency: prismaUser.bankingDetails.agency,
+          accountNumber: prismaUser.bankingDetails.accountNumber,
+          accountType:
+            prismaUser.bankingDetails.accountType === 'CHECKING'
+              ? AccountType.CHECKING
+              : AccountType.SAVINGS,
+          balanceCents: prismaUser.bankingDetails.balanceCents,
+          updatedAt: prismaUser.bankingDetails.updatedAt,
+        },
+        prismaUser.bankingDetails.id,
+      );
+      user.attachBankingDetails(bd);
+    }
+    return user;
+  }
+
+  private mapToPrismaData(user: User) {
+    return {
+      fullName: user.fullName,
+      email: user.email.toString(),
+      address: user.address,
+      profilePictureUrl: user.profilePictureUrl,
+      updatedAt: user.updatedAt,
+      createdAt: user.createdAt,
+    };
+  }
+
+  private mapToPrismaBankingData(bd: BankingDetails) {
+    return {
+      agency: bd.agency,
+      accountNumber: bd.accountNumber,
+      accountType: bd.accountType as 'CHECKING' | 'SAVINGS',
+      balanceCents: bd.balanceCents,
+      updatedAt: bd.updatedAt,
+    };
   }
 }

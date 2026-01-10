@@ -13,5 +13,23 @@ export const createUserSchema = z.object({
     .max(500, 'URL is too long')
     .optional()
     .nullable(),
+  bankingDetails: z.object({
+    agency: z
+      .string()
+      .min(1, 'Agency is required')
+      .max(50, 'Agency is too long'),
+    accountNumber: z
+      .string()
+      .min(1, 'Account number is required')
+      .max(50, 'Account number is too long'),
+    accountType: z.enum(['CHECKING', 'SAVINGS'], {
+      message: 'Account type must be CHECKING or SAVINGS',
+    }),
+    balanceCents: z
+      .number()
+      .int('Balance must be an integer')
+      .min(0, 'Balance cannot be negative')
+      .default(0),
+  }),
 });
 export type CreateUserDto = z.infer<typeof createUserSchema>;
