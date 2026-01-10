@@ -14,8 +14,13 @@ export class PostgresUserRepository implements IUserRepository {
 
     await prisma.user.create({
       data: {
-        ...data,
-        // Se tiver banking details, cria junto numa query só
+        id: data.id,
+        fullName: data.fullName,
+        email: data.email,
+        address: data.address ?? undefined,
+        profilePictureUrl: data.profilePictureUrl ?? undefined,
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
         bankingDetails: user.hasBankingDetails()
           ? { create: this.mapToPrismaBankingData(user.bankingDetails) }
           : undefined,
@@ -29,13 +34,16 @@ export class PostgresUserRepository implements IUserRepository {
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        ...data,
-        updatedAt: new Date(),
+        fullName: data.fullName,
+        email: data.email,
+        address: data.address ?? undefined,
+        profilePictureUrl: data.profilePictureUrl ?? undefined,
+        updatedAt: data.updatedAt,
         bankingDetails: user.hasBankingDetails()
           ? {
               update: {
                 ...this.mapToPrismaBankingData(user.bankingDetails),
-                updatedAt: new Date(),
+                updatedAt: data.updatedAt,
               },
             }
           : undefined,
@@ -46,7 +54,6 @@ export class PostgresUserRepository implements IUserRepository {
   async updateProfile(user: User): Promise<void> {
     const data = this.mapToPrismaData(user);
 
-    // apenas atualiza a tabela User
     await prisma.user.update({
       where: { id: user.id },
       data: {
@@ -63,6 +70,7 @@ export class PostgresUserRepository implements IUserRepository {
     const user = await prisma.user.findUnique({
       where: { id },
     });
+
     return user ? this.toDomainEntity(user) : null;
   }
 
@@ -70,6 +78,7 @@ export class PostgresUserRepository implements IUserRepository {
     const user = await prisma.user.findUnique({
       where: { email },
     });
+
     return user ? this.toDomainEntity(user) : null;
   }
 
@@ -78,6 +87,7 @@ export class PostgresUserRepository implements IUserRepository {
       where: { id },
       include: { bankingDetails: true },
     });
+
     return user ? this.toDomainEntityWithBankingDetails(user) : null;
   }
 
@@ -150,6 +160,7 @@ export class PostgresUserRepository implements IUserRepository {
 
   private mapToPrismaData(user: User) {
     return {
+      id: user.id,
       fullName: user.fullName,
       email: user.email.toString(),
       address: user.address,
@@ -161,9 +172,10 @@ export class PostgresUserRepository implements IUserRepository {
 
   private mapToPrismaBankingData(bd: BankingDetails) {
     return {
+      id: bd.id,
       agency: bd.agency,
       accountNumber: bd.accountNumber,
-      accountType: bd.accountType as 'CHECKING' | 'SAVINGS',
+      accountType: bd.accountType,
       balanceCents: bd.balanceCents,
       updatedAt: bd.updatedAt,
     };

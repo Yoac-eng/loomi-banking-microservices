@@ -23,8 +23,6 @@ export class User {
   constructor(props: UserProps, id?: string) {
     this._id = id ?? randomUUID();
     this._props = props;
-    this._props.createdAt = this._props.createdAt ?? new Date();
-    this._props.updatedAt = this._props.updatedAt ?? new Date();
   }
 
   get id(): string {
@@ -47,12 +45,12 @@ export class User {
     return this._props.profilePictureUrl ?? null;
   }
 
-  get createdAt(): Date | null {
-    return this._props.createdAt ?? null;
+  get createdAt(): Date {
+    return this._props.createdAt ?? new Date();
   }
 
-  get updatedAt(): Date | null {
-    return this._props.updatedAt ?? null;
+  get updatedAt(): Date {
+    return this._props.updatedAt ?? new Date();
   }
 
   get bankingDetails(): BankingDetails {

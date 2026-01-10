@@ -2,10 +2,10 @@ import 'dotenv/config';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
 
-import type { IStorageProvider } from '../../domain/interfaces/providers/storage.provider.interface';
+import type { IStorageRepository } from '../../domain/interfaces/repositories/storage.repository.interface';
 
 @Injectable()
-export class S3StorageProvider implements IStorageProvider {
+export class S3StorageRepository implements IStorageRepository {
   private readonly s3Client: S3Client;
   private readonly bucketName: string;
   private readonly bucketUrl: string;

@@ -18,7 +18,6 @@ export class BankingDetails {
   constructor(props: BankingDetailsProps, id?: string) {
     this._id = id ?? randomUUID();
     this._props = props;
-    this._props.updatedAt = this._props.updatedAt ?? new Date();
   }
 
   get id(): string {
@@ -45,8 +44,8 @@ export class BankingDetails {
     return this._props.balanceCents;
   }
 
-  get updatedAt(): Date | null {
-    return this._props.updatedAt ?? null;
+  get updatedAt(): Date {
+    return this._props.updatedAt ?? new Date();
   }
 
   public toJson(): Record<string, unknown> {
