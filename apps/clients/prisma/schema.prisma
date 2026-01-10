@@ -12,8 +12,13 @@ enum LedgerEntryType {
   DEBIT
 }
 
+enum AccountType {
+  CHECKING
+  SAVINGS
+}
+
 model User {
-  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id                String    @id @db.Uuid
   fullName          String    @map("full_name") @db.VarChar
   email             String    @unique @db.VarChar
   address           String?   @db.Text
@@ -28,11 +33,12 @@ model User {
 }
 
 model BankingDetails {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id            String   @id @db.Uuid
   userId        String   @unique @map("user_id") @db.Uuid
   agency        String   @db.VarChar
   accountNumber String   @unique @map("account_number") @db.VarChar
   balanceCents  Int      @default(0) @map("balance_cents")
+  accountType   AccountType @map("account_type")
   updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
 
   user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -42,7 +48,7 @@ model BankingDetails {
 }
 
 model LedgerEntry {
-  id            String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id            String          @id @db.Uuid
   bankingId     String          @map("banking_id") @db.Uuid
   transactionId String          @map("transaction_id") @db.Uuid
   amountCents   Int             @map("amount_cents")
@@ -56,7 +62,7 @@ model LedgerEntry {
 }
 
 model ClientAuditLog {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id           String   @id @db.Uuid
   userId       String   @map("user_id") @db.Uuid
   action       String   @db.VarChar
   changedFields Json    @map("changed_fields") @db.JsonB

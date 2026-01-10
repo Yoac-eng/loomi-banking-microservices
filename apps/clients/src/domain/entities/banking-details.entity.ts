@@ -1,9 +1,12 @@
 import { randomUUID } from 'crypto';
 
+import { AccountType } from '../enum/account-type.enum';
+
 interface BankingDetailsProps {
   userId: string;
   agency: string;
   accountNumber: string;
+  accountType: AccountType;
   balanceCents: number;
   updatedAt: Date;
 }
@@ -31,6 +34,10 @@ export class BankingDetails {
 
   get accountNumber(): string {
     return this._props.accountNumber;
+  }
+
+  get accountType(): AccountType {
+    return this._props.accountType;
   }
 
   get balanceCents(): number {
