@@ -15,7 +15,7 @@ enum TransactionStatus {
 }
 
 model Transaction {
-  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id              String            @id @db.Uuid
   senderUserId    String            @map("sender_user_id") @db.Uuid
   receiverUserId  String            @map("receiver_user_id") @db.Uuid
   amountCents     Int               @map("amount_cents")
@@ -34,7 +34,7 @@ model Transaction {
 }
 
 model TransactionLifecycleLog {
-  id            String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id            String            @id @db.Uuid
   transactionId String            @map("transaction_id") @db.Uuid
   oldStatus     TransactionStatus? @map("old_status")
   newStatus     TransactionStatus  @map("new_status")

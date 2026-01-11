@@ -27,16 +27,22 @@
     "db:transactions:generate": "prisma generate --schema=apps/transactions/prisma/schema.prisma",
     "db:transactions:migrate:dev": "prisma migrate dev --config apps/transactions/prisma.config.ts",
     "db:transactions:migrate:deploy": "prisma migrate deploy --schema=apps/transactions/prisma/schema.prisma",
-    "db:transactions:studio": "prisma studio --schema=apps/transactions/prisma/schema.prisma"
+    "db:transactions:studio": "prisma studio --schema=apps/transactions/prisma/schema.prisma",
+    "docker:database:up": "docker-compose up -d postgres-clients postgres-transactions redis rabbitmq"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.966.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
+    "@nestjs/microservices": "^11.1.11",
     "@nestjs/platform-express": "^11.0.1",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
+    "@prisma/client-runtime-utils": "^7.2.0",
+    "@types/amqplib": "^0.10.8",
+    "amqp-connection-manager": "^5.0.0",
+    "amqplib": "^0.10.4",
     "dotenv": "^17.2.3",
     "ioredis": "^5.9.1",
     "pg": "^8.16.3",

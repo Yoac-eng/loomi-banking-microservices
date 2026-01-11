@@ -1,10 +1,8 @@
-import { LedgerEntryType } from '../../enum/ledger-entry-type.enum';
 import { LedgerEntry } from '../../entities/ledger-entry.entity';
+import { LedgerEntryType } from '../../enum/ledger-entry-type.enum';
 
 export interface ILedgerEntryRepository {
-  create(
-    ledgerEntry: Omit<LedgerEntry, 'id' | 'createdAt'>,
-  ): Promise<LedgerEntry>;
+  create(ledgerEntry: LedgerEntry): Promise<LedgerEntry>;
   findById(id: string): Promise<LedgerEntry | null>;
   findByBankingId(bankingId: string): Promise<LedgerEntry[]>;
   findByTransactionId(transactionId: string): Promise<LedgerEntry | null>;

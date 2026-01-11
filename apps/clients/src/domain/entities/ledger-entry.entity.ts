@@ -7,7 +7,7 @@ interface LedgerEntryProps {
   transactionId: string;
   amountCents: number;
   type: LedgerEntryType;
-  createdAt: Date;
+  createdAt?: Date;
   description?: string | null;
 }
 
@@ -45,7 +45,7 @@ export class LedgerEntry {
   }
 
   get createdAt(): Date {
-    return this._props.createdAt;
+    return this._props.createdAt ?? new Date();
   }
 
   public toJson(): Record<string, unknown> {

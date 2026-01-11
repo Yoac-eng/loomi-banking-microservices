@@ -63,7 +63,6 @@ export class Transaction {
     return this._props.status === TransactionStatus.PENDING;
   }
 
-  // final status dont have any transitions
   isFinal(): boolean {
     return (
       this._props.status === TransactionStatus.SUCCESS ||
