@@ -1,4 +1,4 @@
-import { Prisma } from '@generated/clients';
+import { Prisma } from '@generated/transactions';
 import {
   ArgumentsHost,
   Catch,

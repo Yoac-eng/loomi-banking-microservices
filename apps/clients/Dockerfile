@@ -25,6 +25,9 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy source code
 COPY . .
 
+# Generate prisma client
+RUN pnpm run db:clients:generate
+
 # Build the clients application
 RUN pnpm exec nest build clients
 

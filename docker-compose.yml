@@ -63,11 +63,16 @@ services:
     container_name: loomi-clients-service
     environment:
       NODE_ENV: ${NODE_ENV:-production}
-      port: ${CLIENTS_PORT:-3000}
+      CLIENTS_PORT: ${CLIENTS_PORT:-3000}
       DATABASE_URL_CLIENTS: postgresql://${POSTGRES_USER:-loomi}:${POSTGRES_PASSWORD:-loomi123}@postgres-clients:5432/${POSTGRES_DB_CLIENTS:-loomi_clients}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-loomi}:${RABBITMQ_PASSWORD:-loomi123}@rabbitmq:5672
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+      S3_BUCKET_URL: ${S3_BUCKET_URL}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
     ports:
       - "${CLIENTS_PORT:-3000}:3000"
     networks:
@@ -89,7 +94,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-loomi}:${RABBITMQ_PASSWORD:-loomi123}@rabbitmq:5672
-      CLIENTS_SERVICE_URL: http://clients-service:3000
+      CLIENTS_SERVICE_URL: ${CLIENTS_SERVICE_URL:-http://clients-service:3000}
     ports:
       - "${TRANSACTIONS_PORT:-3001}:3001"
     networks:
