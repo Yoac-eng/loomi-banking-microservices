@@ -25,11 +25,6 @@ export const createUserSchema = z.object({
     accountType: z.enum(['CHECKING', 'SAVINGS'], {
       message: 'Account type must be CHECKING or SAVINGS',
     }),
-    balanceCents: z
-      .number()
-      .int('Balance must be an integer')
-      .min(0, 'Balance cannot be negative')
-      .default(0),
   }),
 });
 export type CreateUserDto = z.infer<typeof createUserSchema>;

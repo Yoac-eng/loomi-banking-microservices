@@ -51,7 +51,12 @@ export class BankingDetails {
   public toJson(): Record<string, unknown> {
     return {
       id: this._id,
-      ...this._props,
+      userId: this._props.userId,
+      agency: this._props.agency,
+      accountNumber: this._props.accountNumber,
+      accountType: this._props.accountType,
+      balanceCents: this._props.balanceCents,
+      updatedAt: this.updatedAt,
     };
   }
 
