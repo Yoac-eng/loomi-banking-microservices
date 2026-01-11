@@ -25,6 +25,9 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy source code
 COPY . .
 
+# Generate prisma client
+RUN pnpm run db:transactions:generate
+
 # Build the transactions application
 RUN pnpm exec nest build transactions
 

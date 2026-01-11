@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../../node_modules/@generated/transactions"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  CANCELED
+}
+
+model Transaction {
+  id              String            @id @db.Uuid
+  senderUserId    String            @map("sender_user_id") @db.Uuid
+  receiverUserId  String            @map("receiver_user_id") @db.Uuid
+  amountCents     Int               @map("amount_cents")
+  description     String?           @db.Text
+  status          TransactionStatus @default(PENDING)
+  idempotencyKey  String            @unique @map("idempotency_key") @db.VarChar
+  createdAt       DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt       DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  logs TransactionLifecycleLog[]
+
+  @@index([senderUserId], map: "idx_transactions_sender_user_id")
+  @@index([receiverUserId], map: "idx_transactions_receiver_user_id")
+  @@index([status], map: "idx_transactions_status")
+  @@map("transactions")
+}
+
+model TransactionLifecycleLog {
+  id            String            @id @db.Uuid
+  transactionId String            @map("transaction_id") @db.Uuid
+  oldStatus     TransactionStatus? @map("old_status")
+  newStatus     TransactionStatus  @map("new_status")
+  message       String?           @db.Text
+  createdAt     DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  @@map("transaction_lifecycle_logs")
+}
+
