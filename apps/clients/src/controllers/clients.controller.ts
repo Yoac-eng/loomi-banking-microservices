@@ -9,6 +9,7 @@ import {
   UsePipes,
   ParseFilePipeBuilder,
   HttpStatus,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -30,7 +31,7 @@ export class ClientsController {
   ) {}
 
   @Get(':userId')
-  async getUserById(@Param('userId') userId: string) {
+  async getUserById(@Param('userId', ParseUUIDPipe) userId: string) {
     const user = await this.getUserByIdUseCase.execute(userId);
     return user.toJson();
   }
@@ -38,7 +39,7 @@ export class ClientsController {
   @Patch(':userId')
   @UsePipes(new ZodValidationPipe(updateUserSchema))
   async updateUser(
-    @Param('userId') userId: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
     @Body() data: UpdateUserDto,
   ) {
     const user = await this.updateUserUseCase.execute(userId, data);
@@ -48,7 +49,7 @@ export class ClientsController {
   @Patch(':userId/profile-picture')
   @UseInterceptors(FileInterceptor('profilePicture'))
   async updateProfilePicture(
-    @Param('userId') userId: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
     @UploadedFile(
       new ParseFilePipeBuilder()
         .addFileTypeValidator({
