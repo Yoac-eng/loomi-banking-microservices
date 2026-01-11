@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, ConflictException } from '@nestjs/common';
 
 import { BankingDetails } from '../../domain/entities/banking-details.entity';
 import { User } from '../../domain/entities/user.entity';
@@ -21,7 +21,7 @@ export class CreateUserUseCase {
     );
 
     if (existingUser) {
-      throw new Error('User with this email already exists');
+      throw new ConflictException('User with this email already exists');
     }
 
     const emailValueObject = new Email(data.email);
@@ -39,7 +39,7 @@ export class CreateUserUseCase {
         data.bankingDetails.accountType === 'CHECKING'
           ? AccountType.CHECKING
           : AccountType.SAVINGS,
-      balanceCents: data.bankingDetails.balanceCents ?? 0,
+      balanceCents: 0, // balance is set to 0 by default
       updatedAt: new Date(),
     });
     user.attachBankingDetails(bankingDetails);
