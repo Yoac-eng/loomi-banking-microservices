@@ -1,0 +1,31 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # 1. Navigate to the project folder
+            cd /opt/loomi-banking-microservices
+
+            # 2. Fetch the latest changes from main
+            git fetch --all
+            git checkout main
+            git pull origin main
+
+            # 3. Rebuild and restart containers
+            # 'context: .' in docker-compose handles the folder structure automatically
+            docker compose up -d --build --remove-orphans
+
+            # 4. Clean up unused images to save disk space
+            docker image prune -f
