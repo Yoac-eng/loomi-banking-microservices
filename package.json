@@ -9,6 +9,8 @@
     "build": "nest build",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
+    "start:dev:clients": "nest start clients --watch",
+    "start:dev:transactions": "nest start transactions --watch",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/apps/loomi-back-challenge/main",

@@ -51,10 +51,9 @@ export class ClientsController {
   }
 
   @Patch(':userId')
-  @UsePipes(new ZodValidationPipe(updateUserSchema))
   async updateUser(
     @Param('userId', ParseUUIDPipe) userId: string,
-    @Body() data: UpdateUserDto,
+    @Body(new ZodValidationPipe(updateUserSchema)) data: UpdateUserDto,
   ) {
     const user = await this.updateUserUseCase.execute(userId, data);
     return user.toJson();
