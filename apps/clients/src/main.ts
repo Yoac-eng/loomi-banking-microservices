@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { ClientsModule } from './clients.module';
 import { PrismaClientExceptionFilter } from './common/filters/prisma-exception.filter';
@@ -12,6 +13,14 @@ async function bootstrap() {
     new ZodExceptionFilter(),
     new PrismaClientExceptionFilter(),
   );
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Clients Service API')
+    .setDescription('HTTP API for managing users and their banking details.')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('docs', app, swaggerDocument);
 
   app.connectMicroservice({
     transport: Transport.RMQ,

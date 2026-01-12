@@ -8,7 +8,7 @@ interface TransactionProcessMessage {
   transactionId: string;
   senderUserId: string;
   receiverUserId: string;
-  amountCents: number;
+  amountCents: string;
   idempotencyKey: string;
 }
 

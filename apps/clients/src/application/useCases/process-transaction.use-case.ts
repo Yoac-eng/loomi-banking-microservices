@@ -4,13 +4,14 @@ import { LedgerEntry } from '../../domain/entities/ledger-entry.entity';
 import { LedgerEntryType } from '../../domain/enum/ledger-entry-type.enum';
 import type { ILedgerEntryRepository } from '../../domain/interfaces/repositories/ledger-entry.repository.interface';
 import type { IUserRepository } from '../../domain/interfaces/repositories/user.repository.interface';
+import { Amount } from '../../domain/value-objects/amount.value-object';
 import { RabbitMQPublisher } from '../../infra/messaging/rabbitmq-publisher';
 
 interface TransactionProcessMessage {
   transactionId: string;
   senderUserId: string;
   receiverUserId: string;
-  amountCents: number;
+  amountCents: string;
   idempotencyKey: string;
 }
 
@@ -48,12 +49,9 @@ export class ProcessTransactionUseCase {
         );
       }
 
-      console.log('sender', sender);
-      console.log('receiver', receiver);
-      console.log('message', message);
-
+      const amount = Amount.fromString(message.amountCents);
       // Validate balance again (may have changed)
-      if (sender.bankingDetails.balanceCents < message.amountCents) {
+      if (sender.bankingDetails.balanceCents < amount.cents) {
         // publish transaction completed message with failure status
         await this.rabbitmqPublisher.publishTransactionCompleted({
           transactionId: message.transactionId,
@@ -65,18 +63,18 @@ export class ProcessTransactionUseCase {
 
       // Process transaction
       // Debit sender
-      sender.performBankingOperation('debit', message.amountCents);
+      sender.performBankingOperation('debit', amount);
       await this.userRepository.updateFinancials(sender);
 
       // Credit receiver
-      receiver.performBankingOperation('credit', message.amountCents);
+      receiver.performBankingOperation('credit', amount);
       await this.userRepository.updateFinancials(receiver);
 
       // Create ledger entries
       const debitEntry = new LedgerEntry({
         bankingId: sender.bankingDetails.id,
         transactionId: message.transactionId,
-        amountCents: message.amountCents,
+        amount,
         type: LedgerEntryType.DEBIT,
         description: `Transfer to ${receiver.bankingDetails.accountNumber}`,
       });
@@ -85,7 +83,7 @@ export class ProcessTransactionUseCase {
       const creditEntry = new LedgerEntry({
         bankingId: receiver.bankingDetails.id,
         transactionId: message.transactionId,
-        amountCents: message.amountCents,
+        amount,
         type: LedgerEntryType.CREDIT,
         description: `Transfer from ${sender.bankingDetails.accountNumber}`,
       });

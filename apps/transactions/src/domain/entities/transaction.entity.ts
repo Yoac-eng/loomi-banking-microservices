@@ -1,11 +1,12 @@
 import { randomUUID } from 'crypto';
 
 import { TransactionStatus } from '../enum/transaction-status.enum';
+import { Amount } from '../value-objects/amount.value-object';
 
 interface TransactionProps {
   senderUserId: string;
   receiverUserId: string;
-  amountCents: number;
+  amount: Amount;
   description?: string | null;
   status: TransactionStatus;
   idempotencyKey: string;
@@ -35,8 +36,8 @@ export class Transaction {
     return this._props.receiverUserId;
   }
 
-  get amountCents(): number {
-    return this._props.amountCents;
+  get amount(): Amount {
+    return this._props.amount;
   }
 
   get description(): string | null {
@@ -95,7 +96,7 @@ export class Transaction {
     this._props.updatedAt = new Date();
   }
 
-  markAsFailed(message?: string): void {
+  markAsFailed(): void {
     if (!this.canTransitionTo(TransactionStatus.FAILED)) {
       throw new Error(`Cannot transition from ${this._props.status} to FAILED`);
     }
@@ -103,7 +104,7 @@ export class Transaction {
     this._props.updatedAt = new Date();
   }
 
-  markAsCanceled(message?: string): void {
+  markAsCanceled(): void {
     if (!this.canTransitionTo(TransactionStatus.CANCELED)) {
       throw new Error(
         `Cannot transition from ${this._props.status} to CANCELED`,
@@ -113,7 +114,7 @@ export class Transaction {
     this._props.updatedAt = new Date();
   }
 
-  updateStatus(newStatus: TransactionStatus, message?: string): void {
+  updateStatus(newStatus: TransactionStatus): void {
     if (!this.canTransitionTo(newStatus)) {
       throw new Error(
         `Cannot transition from ${this._props.status} to ${newStatus}`,
@@ -133,7 +134,7 @@ export class Transaction {
     if (props.senderUserId === props.receiverUserId) {
       throw new Error('Sender and receiver cannot be the same user');
     }
-    if (props.amountCents <= 0) {
+    if (props.amount.cents <= 0n) {
       throw new Error('Amount must be greater than zero');
     }
     if (!props.idempotencyKey || props.idempotencyKey.trim().length === 0) {
@@ -146,7 +147,7 @@ export class Transaction {
       id: this._id,
       senderUserId: this._props.senderUserId,
       receiverUserId: this._props.receiverUserId,
-      amountCents: this._props.amountCents,
+      amountCents: this._props.amount.toString(),
       description: this._props.description,
       status: this._props.status,
       idempotencyKey: this._props.idempotencyKey,

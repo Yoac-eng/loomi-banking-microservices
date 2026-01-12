@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 
 import { AccountType } from '../enum/account-type.enum';
+import { Amount } from '../value-objects/amount.value-object';
 import { Email } from '../value-objects/email.value-object';
 
 import { BankingDetails } from './banking-details.entity';
@@ -8,6 +9,7 @@ import { BankingDetails } from './banking-details.entity';
 interface UserProps {
   fullName: string;
   email: Email;
+  passwordHash?: string | null;
   address?: string | null;
   profilePictureUrl?: string | null;
   createdAt?: Date;
@@ -35,6 +37,10 @@ export class User {
 
   get email(): Email {
     return this._props.email;
+  }
+
+  get passwordHash(): string | null {
+    return this._props.passwordHash ?? null;
   }
 
   get address(): string | null {
@@ -102,17 +108,14 @@ export class User {
     this._props.updatedAt = new Date();
   }
 
-  performBankingOperation(
-    operation: 'credit' | 'debit',
-    amountCents: number,
-  ): void {
+  performBankingOperation(operation: 'credit' | 'debit', amount: Amount): void {
     if (!this._bankingDetails) {
       throw new Error('Banking details not loaded in aggregate');
     }
     if (operation === 'credit') {
-      this._bankingDetails.credit(amountCents);
+      this._bankingDetails.credit(amount);
     } else {
-      this._bankingDetails.debit(amountCents);
+      this._bankingDetails.debit(amount);
     }
     this._props.updatedAt = new Date();
   }

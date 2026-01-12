@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtModule } from '@nestjs/jwt';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 
 import { TransactionLifecycleLogger } from './application/services/transaction-lifecycle-logger.service';
@@ -7,6 +9,7 @@ import { GetTransactionByIdUseCase } from './application/useCases/get-transactio
 import { GetTransactionsByUserIdUseCase } from './application/useCases/get-transactions-by-user-id.use-case';
 import { ProcessTransactionCompletedUseCase } from './application/useCases/process-transaction-completed.use-case';
 import { UpdateTransactionStatusUseCase } from './application/useCases/update-transaction-status.use-case';
+import { JwtAuthGuard } from './common/auth/jwt-auth.guard';
 import { TransactionsRmqController } from './controllers/transactions-rmq.controller';
 import { TransactionsController } from './controllers/transactions.controller';
 import type { ICache } from './domain/interfaces/repositories/cache/cache.provider.interface';
@@ -21,6 +24,10 @@ import { PostgresTransactionRepository } from './infra/repositories/postgres-tra
 
 @Module({
   imports: [
+    JwtModule.register({
+      secret: process.env.JWT_SECRET ?? 'dev-jwt-secret',
+      signOptions: { expiresIn: 3600 },
+    }),
     ClientsModule.register([
       {
         name: 'CLIENTS_RMQ_CLIENT',
@@ -70,6 +77,10 @@ import { PostgresTransactionRepository } from './infra/repositories/postgres-tra
     GetTransactionsByUserIdUseCase,
     UpdateTransactionStatusUseCase,
     ProcessTransactionCompletedUseCase,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
   ],
 })
 export class TransactionsModule {}

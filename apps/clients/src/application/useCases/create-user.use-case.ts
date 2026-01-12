@@ -1,9 +1,11 @@
 import { Injectable, Inject, ConflictException } from '@nestjs/common';
+import { hash } from 'bcryptjs';
 
 import { BankingDetails } from '../../domain/entities/banking-details.entity';
 import { User } from '../../domain/entities/user.entity';
 import { AccountType } from '../../domain/enum/account-type.enum';
 import type { IUserRepository } from '../../domain/interfaces/repositories/user.repository.interface';
+import { Amount } from '../../domain/value-objects/amount.value-object';
 import { Email } from '../../domain/value-objects/email.value-object';
 import { CreateUserDto } from '../dtos/create-user.dto';
 
@@ -24,10 +26,12 @@ export class CreateUserUseCase {
       throw new ConflictException('User with this email already exists');
     }
 
+    const passwordHash = await hash(data.password, 10);
     const emailValueObject = new Email(data.email);
     const user = new User({
       fullName: data.fullName,
       email: emailValueObject,
+      passwordHash,
       address: data.address ?? null,
       profilePictureUrl: data.profilePictureUrl ?? null,
     });
@@ -39,7 +43,7 @@ export class CreateUserUseCase {
         data.bankingDetails.accountType === 'CHECKING'
           ? AccountType.CHECKING
           : AccountType.SAVINGS,
-      balanceCents: 0, // balance is set to 0 by default
+      balance: Amount.create(0), // balance is set to 0 by default
       updatedAt: new Date(),
     });
     user.attachBankingDetails(bankingDetails);

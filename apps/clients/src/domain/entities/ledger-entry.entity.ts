@@ -1,11 +1,12 @@
 import { randomUUID } from 'crypto';
 
 import { LedgerEntryType } from '../enum/ledger-entry-type.enum';
+import { Amount } from '../value-objects/amount.value-object';
 
 interface LedgerEntryProps {
   bankingId: string;
   transactionId: string;
-  amountCents: number;
+  amount: Amount;
   type: LedgerEntryType;
   createdAt?: Date;
   description?: string | null;
@@ -32,8 +33,8 @@ export class LedgerEntry {
     return this._props.transactionId;
   }
 
-  get amountCents(): number {
-    return this._props.amountCents;
+  get amount(): Amount {
+    return this._props.amount;
   }
 
   get type(): LedgerEntryType {
@@ -51,7 +52,12 @@ export class LedgerEntry {
   public toJson(): Record<string, unknown> {
     return {
       id: this._id,
-      ...this._props,
+      bankingId: this._props.bankingId,
+      transactionId: this._props.transactionId,
+      amountCents: this._props.amount.toString(),
+      type: this._props.type,
+      description: this._props.description,
+      createdAt: this.createdAt,
     };
   }
 }

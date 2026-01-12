@@ -6,6 +6,7 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 
 import type {
   IClientsServiceClient,
@@ -19,7 +20,7 @@ interface ClientsServiceResponse {
     agency: string;
     accountNumber: string;
     accountType: string;
-    balanceCents: number;
+    balanceCents: string;
     updatedAt: string | Date | null;
   } | null;
 }
@@ -29,7 +30,7 @@ export class ClientsServiceClient implements IClientsServiceClient {
   private readonly baseUrl: string;
   private readonly logger = new Logger(ClientsServiceClient.name);
 
-  constructor() {
+  constructor(private readonly jwtService: JwtService) {
     this.baseUrl = process.env.CLIENTS_SERVICE_URL || 'http://localhost:3000';
     if (!this.baseUrl) {
       throw new Error('CLIENTS_SERVICE_URL environment variable is required');
@@ -40,10 +41,15 @@ export class ClientsServiceClient implements IClientsServiceClient {
     const url = `${this.baseUrl}/api/users/${userId}`;
 
     try {
+      const serviceToken = await this.jwtService.signAsync({
+        sub: 'transactions-service',
+        tokenType: 'service',
+      });
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${serviceToken}`,
         },
       });
 
@@ -75,7 +81,7 @@ export class ClientsServiceClient implements IClientsServiceClient {
         id: data.id,
         bankingDetails: data.bankingDetails
           ? {
-              balanceCents: data.bankingDetails.balanceCents,
+              balanceCents: BigInt(data.bankingDetails.balanceCents),
               accountNumber: data.bankingDetails.accountNumber,
               agency: data.bankingDetails.agency,
             }

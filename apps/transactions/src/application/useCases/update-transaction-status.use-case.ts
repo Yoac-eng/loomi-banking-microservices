@@ -27,10 +27,10 @@ export class UpdateTransactionStatusUseCase {
 
     const oldStatus = transaction.status;
 
-    // Validar e atualizar status
-    transaction.updateStatus(newStatus, message);
+    // Validate and update status
+    transaction.updateStatus(newStatus);
 
-    // Criar log de mudança
+    // Create status change log
     await this.lifecycleLogger.logStatusChange(
       transactionId,
       oldStatus,
@@ -38,7 +38,7 @@ export class UpdateTransactionStatusUseCase {
       message,
     );
 
-    // Salvar alterações
+    // Save changes
     await this.transactionRepository.update(transaction);
 
     return transaction;
