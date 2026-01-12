@@ -35,11 +35,15 @@ export class CreateUserRequestDto {
       agency: '0001',
       accountNumber: '123456-7',
       accountType: 'CHECKING',
+      initialBalance: 10000,
     },
+    description:
+      'Banking details. initialBalance is optional (defaults to 0, in cents).',
   })
   public readonly bankingDetails!: {
     agency: string;
     accountNumber: string;
     accountType: AccountType;
+    initialBalance?: number;
   };
 }
