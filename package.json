@@ -20,8 +20,6 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/loomi-back-challenge/test/jest-e2e.json",
-    "db:generate": "pnpm db:clients:generate && pnpm db:transactions:generate",
-    "db:migrate:dev": "pnpm db:clients:migrate:dev && pnpm db:transactions:migrate:dev",
     "db:clients:generate": "prisma generate --schema=apps/clients/prisma/schema.prisma",
     "db:clients:migrate:dev": "prisma migrate dev --config apps/clients/prisma.config.ts",
     "db:clients:migrate:deploy": "prisma migrate deploy --config apps/clients/prisma.config.ts",
@@ -31,7 +29,6 @@
     "db:transactions:migrate:deploy": "prisma migrate deploy --config apps/transactions/prisma.config.ts",
     "db:transactions:studio": "prisma studio --schema=apps/transactions/prisma/schema.prisma",
     "docker:database:up": "docker-compose up -d postgres-clients postgres-transactions redis rabbitmq",
-    "docker:up": "docker compose up -d",
     "docker:all:up": "docker-compose up -d --build"
   },
   "dependencies": {

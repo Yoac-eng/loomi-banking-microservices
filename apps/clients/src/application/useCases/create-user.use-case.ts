@@ -43,7 +43,7 @@ export class CreateUserUseCase {
         data.bankingDetails.accountType === 'CHECKING'
           ? AccountType.CHECKING
           : AccountType.SAVINGS,
-      balance: Amount.create(0), // balance is set to 0 by default
+      balance: Amount.create(data.bankingDetails.initialBalance ?? 0),
       updatedAt: new Date(),
     });
     user.attachBankingDetails(bankingDetails);
