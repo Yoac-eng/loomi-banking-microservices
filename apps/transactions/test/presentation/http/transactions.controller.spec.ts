@@ -1,15 +1,15 @@
 import type { INestApplication } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { JwtModule, JwtService } from '@nestjs/jwt';
-import { APP_GUARD } from '@nestjs/core';
 
-import { CreateTransactionUseCase } from './application/useCases/create-transaction.use-case';
-import { GetTransactionByIdUseCase } from './application/useCases/get-transaction-by-id.use-case';
-import { GetTransactionsByUserIdUseCase } from './application/useCases/get-transactions-by-user-id.use-case';
-import { JwtAuthGuard } from './common/auth/jwt-auth.guard';
-import { ZodExceptionFilter } from './common/filters/zod-exception.filter';
-import { TransactionsController } from './controllers/transactions.controller';
+import { CreateTransactionUseCase } from '../../../src/application/useCases/create-transaction.use-case';
+import { GetTransactionByIdUseCase } from '../../../src/application/useCases/get-transaction-by-id.use-case';
+import { GetTransactionsByUserIdUseCase } from '../../../src/application/useCases/get-transactions-by-user-id.use-case';
+import { JwtAuthGuard } from '../../../src/common/auth/jwt-auth.guard';
+import { ZodExceptionFilter } from '../../../src/common/filters/zod-exception.filter';
+import { TransactionsController } from '../../../src/controllers/transactions.controller';
 
 describe('TransactionsController', () => {
   let app: INestApplication;
@@ -88,7 +88,8 @@ describe('TransactionsController', () => {
       sub: '11111111-1111-1111-1111-111111111111',
       tokenType: 'user',
     });
-    const inputSenderUserId: string = '2f1b5e1c-3a5d-4e8d-8b9a-0f2d3c4b5a6e';
+    const inputSenderUserId: string =
+      '2f1b5e1c-3a5d-4e8d-8b9a-0f2d3c4b5a6e';
     const inputReceiverUserId: string =
       '7c6d5e4f-3b2a-1c0d-9e8f-7a6b5c4d3e2f';
     const inputIdempotencyKey: string = 'idem-test-1';
@@ -122,3 +123,5 @@ describe('TransactionsController', () => {
       .expect(expectedBody);
   });
 });
+
+

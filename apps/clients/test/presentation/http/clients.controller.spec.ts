@@ -1,16 +1,16 @@
 import type { INestApplication } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { JwtModule, JwtService } from '@nestjs/jwt';
-import { APP_GUARD } from '@nestjs/core';
 
-import { CreateUserUseCase } from './application/useCases/create-user.use-case';
-import { GetUserByIdUseCase } from './application/useCases/get-user-by-id.use-case';
-import { UpdateProfilePictureUseCase } from './application/useCases/update-profile-picture.use-case';
-import { UpdateUserUseCase } from './application/useCases/update-user.use-case';
-import { JwtAuthGuard } from './common/auth/jwt-auth.guard';
-import { ZodExceptionFilter } from './common/filters/zod-exception.filter';
-import { ClientsController } from './controllers/clients.controller';
+import { CreateUserUseCase } from '../../../src/application/useCases/create-user.use-case';
+import { GetUserByIdUseCase } from '../../../src/application/useCases/get-user-by-id.use-case';
+import { UpdateProfilePictureUseCase } from '../../../src/application/useCases/update-profile-picture.use-case';
+import { UpdateUserUseCase } from '../../../src/application/useCases/update-user.use-case';
+import { JwtAuthGuard } from '../../../src/common/auth/jwt-auth.guard';
+import { ZodExceptionFilter } from '../../../src/common/filters/zod-exception.filter';
+import { ClientsController } from '../../../src/controllers/clients.controller';
 
 describe('ClientsController', () => {
   let app: INestApplication;
@@ -111,4 +111,5 @@ describe('ClientsController', () => {
       .expect(expectedBody);
   });
 });
+
 
