@@ -12,6 +12,13 @@ export class CreateUserRequestDto {
   @ApiProperty({ example: 'ada@lovelace.dev' })
   public readonly email!: string;
 
+  @ApiProperty({
+    minLength: 8,
+    example: 'ChangeMe123!',
+    description: 'Plain-text password; will be stored as a hash.',
+  })
+  public readonly password!: string;
+
   @ApiProperty({ required: false, nullable: true, example: '123 Main St' })
   public readonly address?: string | null;
 

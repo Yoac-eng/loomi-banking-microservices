@@ -6,7 +6,6 @@ import {
   Body,
   UseInterceptors,
   UploadedFile,
-  UseGuards,
   UsePipes,
   ParseFilePipeBuilder,
   HttpStatus,
@@ -23,7 +22,6 @@ import {
   ApiParam,
   ApiSecurity,
   ApiTags,
-  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
 import {
@@ -38,7 +36,7 @@ import { CreateUserUseCase } from '../application/useCases/create-user.use-case'
 import { GetUserByIdUseCase } from '../application/useCases/get-user-by-id.use-case';
 import { UpdateProfilePictureUseCase } from '../application/useCases/update-profile-picture.use-case';
 import { UpdateUserUseCase } from '../application/useCases/update-user.use-case';
-import { ApiKeyGuard } from '../common/guards/api-key.guard';
+import { Public } from '../common/auth/public.decorator';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 
 import { CreateUserRequestDto } from './dtos/create-user-request.dto';
@@ -48,8 +46,7 @@ import { UserResponseDto } from './dtos/user-response.dto';
 
 @Controller('api/users')
 @ApiTags('users')
-@ApiSecurity('apiKey')
-@UseGuards(ApiKeyGuard)
+@ApiSecurity('bearer')
 export class ClientsController {
   constructor(
     private readonly getUserByIdUseCase: GetUserByIdUseCase,
@@ -59,10 +56,10 @@ export class ClientsController {
   ) {}
 
   @Post()
+  @Public()
   @ApiOperation({ summary: 'Create a user (with banking details)' })
   @ApiBody({ type: CreateUserRequestDto })
   @ApiCreatedResponse({ type: UserResponseDto })
-  @ApiUnauthorizedResponse({ description: 'Missing or invalid API key' })
   @UsePipes(new ZodValidationPipe(createUserSchema))
   async createUser(@Body() data: CreateUserDto) {
     const user = await this.createUserUseCase.execute(data);
@@ -73,7 +70,6 @@ export class ClientsController {
   @ApiOperation({ summary: 'Get user details (including banking details)' })
   @ApiParam({ name: 'userId', format: 'uuid' })
   @ApiOkResponse({ type: UserResponseDto })
-  @ApiUnauthorizedResponse({ description: 'Missing or invalid API key' })
   async getUserById(@Param('userId', ParseUUIDPipe) userId: string) {
     const user = await this.getUserByIdUseCase.execute(userId);
     return user.toJson();
@@ -84,7 +80,6 @@ export class ClientsController {
   @ApiParam({ name: 'userId', format: 'uuid' })
   @ApiBody({ type: UpdateUserRequestDto })
   @ApiOkResponse({ type: UserResponseDto })
-  @ApiUnauthorizedResponse({ description: 'Missing or invalid API key' })
   async updateUser(
     @Param('userId', ParseUUIDPipe) userId: string,
     @Body(new ZodValidationPipe(updateUserSchema)) data: UpdateUserDto,
@@ -99,7 +94,6 @@ export class ClientsController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UpdateProfilePictureRequestDto })
   @ApiOkResponse({ type: UserResponseDto })
-  @ApiUnauthorizedResponse({ description: 'Missing or invalid API key' })
   @UseInterceptors(FileInterceptor('profilePicture'))
   async updateProfilePicture(
     @Param('userId', ParseUUIDPipe) userId: string,

@@ -82,6 +82,11 @@ O motor de processamento financeiro.
 3. **Configure as variáveis de ambiente:**
    Crie um arquivo `.env` na raiz (baseado no arquivo env.example) para que o Prisma saiba onde conectar.
 
+   Variáveis mínimas:
+   - `JWT_SECRET`: segredo usado para assinar e validar JWTs (HMAC). Obrigatório em produção.
+   - `CLIENTS_PORT`: porta do serviço de clientes (default: `3000`)
+   - `port`: porta do serviço de transações (default: `3001`)
+
 4. **Execute as migrações do banco de dados:**
    Isso criará as tabelas nos bancos `loomi_clients` e `loomi_transactions`.
 
@@ -99,3 +104,33 @@ O motor de processamento financeiro.
    ```
 
 ---
+
+## 🔐 Autenticação (API Key)
+
+O sistema utiliza **JWT Bearer Token**.
+
+- Para obter um token: `POST /api/auth/login` (Clients Service)
+- Para chamar endpoints protegidos: envie `Authorization: Bearer <token>`
+
+---
+
+## 📚 Swagger / OpenAPI
+
+Após subir os serviços, a documentação Swagger fica disponível em:
+
+- **Clients Service**: `http://localhost:3000/docs`
+- **Transactions Service**: `http://localhost:3001/docs`
+
+---
+
+## 🔑 `JWT_SECRET` (como configurar)
+
+O `JWT_SECRET` é o segredo HMAC usado para **assinar** e **validar** tokens JWT.
+
+- Local: coloque no seu `.env` (na raiz do projeto)
+- Produção (EC2): configure no ambiente do container/serviço (ex: `docker-compose`, `systemd`, ou export no shell da instância) e **não** commite esse valor no Git.
+
+Regras:
+- Use um valor forte (mínimo 32 caracteres, aleatório)
+- O mesmo `JWT_SECRET` deve ser usado por **Clients** e **Transactions** (ambos verificam tokens)
+

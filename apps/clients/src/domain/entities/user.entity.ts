@@ -8,6 +8,7 @@ import { BankingDetails } from './banking-details.entity';
 interface UserProps {
   fullName: string;
   email: Email;
+  passwordHash?: string | null;
   address?: string | null;
   profilePictureUrl?: string | null;
   createdAt?: Date;
@@ -35,6 +36,10 @@ export class User {
 
   get email(): Email {
     return this._props.email;
+  }
+
+  get passwordHash(): string | null {
+    return this._props.passwordHash ?? null;
   }
 
   get address(): string | null {

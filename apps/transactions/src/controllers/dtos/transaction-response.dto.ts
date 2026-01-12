@@ -4,7 +4,6 @@ import { TransactionStatus } from '../../domain/enum/transaction-status.enum';
 
 /**
  * Swagger response DTO for a transaction.
- * Mirrors `Transaction.toJson()` shape.
  */
 export class TransactionResponseDto {
   @ApiProperty({ format: 'uuid' })

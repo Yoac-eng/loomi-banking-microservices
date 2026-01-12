@@ -13,16 +13,7 @@ async function bootstrap() {
     .setTitle('Transactions Service API')
     .setDescription('HTTP API for creating and querying transfers.')
     .setVersion('1.0')
-    .addApiKey(
-      {
-        type: 'apiKey',
-        name: 'x-api-key',
-        in: 'header',
-        description:
-          'Set it to the same value as API_KEY environment variable.',
-      },
-      'apiKey',
-    )
+    .addBearerAuth()
     .build();
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, swaggerDocument);
