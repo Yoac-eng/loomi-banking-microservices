@@ -1,136 +1,185 @@
-# 🏦 Loomi Banking Challenge - Microservices Ecosystem
+## Loomi Banking Challenge - Banking Microservices (Node/NestJS)
 
-Este projeto implementa um ecossistema bancário distribuído, focado em escalabilidade, consistência de dados e desacoplamento de serviços.
+Este repositório implementa um ecossistema bancário distribuído em dois microsserviços (Clients e Transactions), com foco em consistência de dados, desacoplamento e testabilidade.
 
-A solução adota uma abordagem de **Monorepo** utilizando **NestJS Workspaces**, permitindo a gestão unificada de múltiplos microsserviços e bibliotecas compartilhadas sem sacrificar a independência de deploy.
+## Relatório de Progresso
 
----
+### Backlog e plataforma de gestão
+- **ClickUp**: [board/lista do projeto](https://app.clickup.com/90132914161/v/s/901312622515)
 
-## 🏗 Decisões Arquiteturais
+### Como organizei demandas e atividades
+Organizei as entregas priorizando decisões de alto nível (modelagem de fluxo, comunicação entre serviços, modelagem de dados e arquitetura) antes de passar para implementações. Em seguida, priorizei o módulo de Clients (core banking e fonte da verdade financeira) para então evoluir o fluxo principal de Transactions, finalizando com cache, mensageria, autenticação, documentação e testes.
 
-### 1. Por que Monorepo?
-Embora o sistema seja composto por microsserviços independentes, optamos por utilizar um Monorepo para garantir:
-- **Consistência de Contratos:** Tipagem compartilhada (DTOs, Enums) entre serviços, evitando que mudanças em uma ponta quebrem a outra silenciosamente.
-- **Padronização:** Configurações de Lint (`ESLint`), Formatação (`Prettier`) e TypeScript (`tsconfig`) unificadas na raiz.
-- **Orquestração Simplificada:** Um único `docker-compose.yml` sobe todo o ambiente de desenvolvimento (Bancos, Cache, Broker e APIs).
+### Como priorizei as entregas
+- **Risco primeiro**: fluxo de dinheiro, idempotência e consistência entre serviços.
+- **Experiência do avaliador**: Swagger + instruções claras de execução/testes.
+- **Segurança e contratos**: autenticação JWT, tipagem/contratos e validação de entrada.
+- **Testabilidade**: Clean Architecture e testes unitários dos casos de uso.
 
-### 2. Clean Architecture
-Cada microsserviço segue rigorosamente os princípios da Clean Architecture para garantir testabilidade e isolamento das regras de negócio:
-- **Domain:** Entidades e regras de negócio puras (sem dependências externas).
-- **Application:** Casos de uso (Use Cases) que orquestram o fluxo.
-- **Infrastructure:** Implementações concretas (Prisma, Repositórios, RabbitMQ).
-- **Presentation:** Controllers e Resolvers.
+### Principais dificuldades e como lidei
+- **Migrations do Prisma**: alterações de schema para `BigInt` e migrações por serviço.
+- **Cache (Redis) vs estado do banco**: identificação de leituras “cache-first” gerando respostas desatualizadas após edições manuais no Postgres; estratégia de invalidação/limpeza para testes.
+- **Idempotência**: garantir repetibilidade de requests e retorno determinístico quando a mesma chave é reutilizada.
 
----
+### O que faria diferente com mais tempo
+- **E2E por serviço** (com Docker Compose em CI) cobrindo os fluxos completos.
+- **Observabilidade** (logs estruturados, tracing entre serviços).
+- **Resiliência na mensageria** (retries, DLQ, backoff, idempotência do consumidor).
+- **Estratégia formal de cache invalidation** (TTL + invalidação por eventos).
 
-## 🛠 Tech Stack
+## Serviços
 
-| Categoria | Tecnologia |
-| :--- | :--- |
-| **Runtime** | Node.js 22 (LTS) |
-| **Framework** | NestJS |
-| **Linguagem** | TypeScript |
-| **Gerenciador** | pnpm |
-| **ORM** | Prisma |
-| **Validação** | Zod |
-| **Banco de Dados** | PostgreSQL |
-| **Cache/NoSQL** | Redis |
-| **Mensageria** | RabbitMQ |
-| **Infra** | Docker Compose |
+### Clients Service (`apps/clients`)
+- **Responsabilidade**: identidade do usuário e “fonte da verdade” financeira (saldo via ledger).
+- **Infra**: Postgres + Redis.
+- **API**: gerenciamento de usuários e detalhes bancários; autenticação (login).
 
-## 📦 Serviços do Ecossistema
+### Transactions Service (`apps/transactions`)
+- **Responsabilidade**: orquestração de transferências.
+- **Infra**: Postgres + Redis + RabbitMQ.
+- **API**: criação/consulta de transações.
+- **Comunicação**:
+  - **HTTP**: consulta de dados bancários no Clients.
+  - **RabbitMQ**: publicação/consumo de eventos de processamento.
 
-O projeto está dividido em duas aplicações principais dentro da pasta `apps/`:
+## Decisões arquiteturais (resumo)
 
-### 👥 Clients Service (`apps/clients`)
-O "Core Banking" do sistema.
-- **Responsabilidades:** Gestão de identidade, dados bancários e a "Fonte da Verdade" financeira.
-- **Features Chave:**
-  - Gerenciamento de saldo via **Ledger** (Partida Dobrada: Credit/Debit).
-  - Cache de dados de usuário com **Redis** para alta disponibilidade.
-  - Auditoria de alterações cadastrais.
+### Monorepo
+Optei por monorepo para manter consistência de tooling (TypeScript/ESLint/Prettier), facilitar execução local e permitir evolução coordenada de contratos, sem impedir deploy independente.
 
-### 💸 Transactions Service (`apps/transactions`)
-O motor de processamento financeiro.
-- **Responsabilidades:** Orquestração de transferências entre contas.
-- **Features Chave:**
-  - **Idempotência:** Garante que a mesma transação não seja processada duas vezes (via Redis).
-  - **Comunicação Híbrida:** - *Síncrona (HTTP):* Para validação de saldo em tempo real.
-    - *Assíncrona (RabbitMQ):* Para efetivação contábil e notificações.
+### Clean Architecture (por serviço)
+- **Domain**: entidades e regras de negócio (sem dependências externas).
+- **Application**: casos de uso (orquestração do fluxo).
+- **Infrastructure**: Prisma, repositórios, HTTP clients e mensageria.
+- **Presentation**: controllers HTTP e handlers de mensageria.
 
----
+## Endpoints em produção (EC2)
 
-## 🚀 Como Executar
+### Base URLs
+- **Clients**: `http://ec2-100-31-156-98.compute-1.amazonaws.com:3000`
+- **Transactions**: `http://ec2-100-31-156-98.compute-1.amazonaws.com:3001`
 
-### Pré-requisitos
-- Node.js (v20+)
-- Docker & Docker Compose
-- pnpm (`npm install -g pnpm`)
+### Swagger (EC2)
+- **Clients**: `http://ec2-100-31-156-98.compute-1.amazonaws.com:3000/docs`
+- **Transactions**: `http://ec2-100-31-156-98.compute-1.amazonaws.com:3001/docs`
 
-### Passo a Passo
+## Swagger / OpenAPI (local)
+- **Clients**: `http://localhost:3000/docs`
+- **Transactions**: `http://localhost:3001/docs`
 
-1. **Instale as dependências:**
-   ```bash
-   pnpm install
-   ```
-
-2. **Suba a infraestrutura (Bancos, Redis e RabbitMQ):**
-   ```bash
-   docker-compose up -d
-   ```
-
-3. **Configure as variáveis de ambiente:**
-   Crie um arquivo `.env` na raiz (baseado no arquivo env.example) para que o Prisma saiba onde conectar.
-
-   Variáveis mínimas:
-   - `JWT_SECRET`: segredo usado para assinar e validar JWTs (HMAC). Obrigatório em produção.
-   - `CLIENTS_PORT`: porta do serviço de clientes (default: `3000`)
-   - `port`: porta do serviço de transações (default: `3001`)
-
-4. **Execute as migrações do banco de dados:**
-   Isso criará as tabelas nos bancos `loomi_clients` e `loomi_transactions`.
-
-   ```bash
-   # Para o serviço de Clientes
-   pnpm prisma migrate dev --schema=apps/clients/prisma/schema.prisma --name init
-
-   # Para o serviço de Transações
-   pnpm prisma migrate dev --schema=apps/transactions/prisma/schema.prisma --name init
-   ```
-
-5. **Inicie os microsserviços (Modo Dev):**
-   ```bash
-   pnpm start:dev
-   ```
-
----
-
-## 🔐 Autenticação (API Key)
+## Autenticação (JWT)
 
 O sistema utiliza **JWT Bearer Token**.
 
-- Para obter um token: `POST /api/auth/login` (Clients Service)
-- Para chamar endpoints protegidos: envie `Authorization: Bearer <token>`
+### Como obter token
+- **Login** (Clients): `POST /api/auth/login`
+- Envie `Authorization: Bearer <token>` nos endpoints protegidos.
 
----
+### `JWT_SECRET` (como configurar)
+- O `JWT_SECRET` é o segredo HMAC usado para **assinar** e **validar** JWT.
+- O mesmo `JWT_SECRET` deve ser usado por **Clients** e **Transactions**.
+- Em produção: configure via variável de ambiente no container/serviço e não faça commit.
 
-## 📚 Swagger / OpenAPI
+Gerar um segredo forte (exemplos):
 
-Após subir os serviços, a documentação Swagger fica disponível em:
+```bash
+openssl rand -base64 32
+```
 
-- **Clients Service**: `http://localhost:3000/docs`
-- **Transactions Service**: `http://localhost:3001/docs`
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+## Contrato de dinheiro (cents) e BigInt
 
----
+Todas as regras de negócio usam dinheiro internamente como `bigint` (via value object `Amount`) para evitar problemas de precisão/overflow.
 
-## 🔑 `JWT_SECRET` (como configurar)
+- **Entrada (DTO/Controller)**: `number` representando centavos.
+- **Domínio (Use Cases/Entities)**: `Amount` (`bigint`).
+- **Banco (Postgres/Prisma)**: `BigInt`.
+- **Saída (API)**: `string` representando centavos (ex: `"1500"`).
+- **Mensageria (RabbitMQ)**: `string` representando centavos, para compatibilidade e serialização.
 
-O `JWT_SECRET` é o segredo HMAC usado para **assinar** e **validar** tokens JWT.
+## Como executar (local)
 
-- Local: coloque no seu `.env` (na raiz do projeto)
-- Produção (EC2): configure no ambiente do container/serviço (ex: `docker-compose`, `systemd`, ou export no shell da instância) e **não** commite esse valor no Git.
+### Pré-requisitos
+- Node.js (v20+)
+- Docker + Docker Compose
+- pnpm
 
-Regras:
-- Use um valor forte (mínimo 32 caracteres, aleatório)
-- O mesmo `JWT_SECRET` deve ser usado por **Clients** e **Transactions** (ambos verificam tokens)
+### Passo a passo
+1. Instale dependências:
+
+```bash
+pnpm install
+```
+
+2. Suba a infraestrutura (Postgres, Redis, RabbitMQ):
+
+```bash
+docker compose up -d
+```
+
+Alternativas (scripts do projeto):
+
+```bash
+pnpm docker:up
+```
+
+3. Configure variáveis de ambiente:
+- Crie `.env` na raiz (baseado no `env.example`).
+- Variáveis mínimas:
+  - `JWT_SECRET`
+  - `CLIENTS_PORT` (default `3000`)
+  - `port` (Transactions, default `3001`)
+
+4. Rode migrations (por serviço):
+
+```bash
+pnpm db:clients:migrate:dev
+pnpm db:transactions:migrate:dev
+```
+
+Alternativa (rodar migrations dos dois serviços):
+
+```bash
+pnpm db:migrate:dev
+```
+
+5. Rode os serviços:
+
+```bash
+pnpm start:dev:clients
+pnpm start:dev:transactions
+```
+
+Opcional (tudo junto, watch):
+
+```bash
+pnpm start:dev
+```
+## Como testar
+
+### Executar testes
+```bash
+pnpm test
+```
+
+Watch mode:
+
+```bash
+pnpm test:watch
+```
+
+### Estrutura dos testes
+- **Unit (Application / Use Cases)**: `apps/*/test/application/use-cases/*.spec.ts`
+- **HTTP (Presentation / Controllers)**: `apps/*/test/presentation/http/*.spec.ts`
+
+## Uso de IA
+
+Ferramentas utilizadas: **Cursor** (editor) e **ChatGPT**.
+
+Uso principal:
+- acelerar refatorações com revisão humana (JWT, Amount/BigInt, testes)
+- gerar drafts de documentação e checklists de execução
+- apoiar na criação de cenários de teste unitário e contratos entre camadas
 
