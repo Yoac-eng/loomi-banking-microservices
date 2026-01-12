@@ -20,7 +20,7 @@ interface ClientsServiceResponse {
     agency: string;
     accountNumber: string;
     accountType: string;
-    balanceCents: number;
+    balanceCents: string;
     updatedAt: string | Date | null;
   } | null;
 }
@@ -81,7 +81,7 @@ export class ClientsServiceClient implements IClientsServiceClient {
         id: data.id,
         bankingDetails: data.bankingDetails
           ? {
-              balanceCents: data.bankingDetails.balanceCents,
+              balanceCents: BigInt(data.bankingDetails.balanceCents),
               accountNumber: data.bankingDetails.accountNumber,
               agency: data.bankingDetails.agency,
             }

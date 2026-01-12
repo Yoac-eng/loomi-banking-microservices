@@ -4,6 +4,7 @@ import { BankingDetails } from '../../domain/entities/banking-details.entity';
 import { User } from '../../domain/entities/user.entity';
 import { AccountType } from '../../domain/enum/account-type.enum';
 import type { IUserRepository } from '../../domain/interfaces/repositories/user.repository.interface';
+import { Amount } from '../../domain/value-objects/amount.value-object';
 import { Email } from '../../domain/value-objects/email.value-object';
 import { prisma } from '../lib/prisma';
 
@@ -137,7 +138,7 @@ export class PostgresUserRepository implements IUserRepository {
       agency: string;
       accountNumber: string;
       accountType: 'CHECKING' | 'SAVINGS';
-      balanceCents: number;
+      balanceCents: bigint;
       updatedAt: Date;
     } | null;
   }): User {
@@ -152,7 +153,7 @@ export class PostgresUserRepository implements IUserRepository {
             prismaUser.bankingDetails.accountType === 'CHECKING'
               ? AccountType.CHECKING
               : AccountType.SAVINGS,
-          balanceCents: prismaUser.bankingDetails.balanceCents,
+          balance: Amount.fromRaw(prismaUser.bankingDetails.balanceCents),
           updatedAt: prismaUser.bankingDetails.updatedAt,
         },
         prismaUser.bankingDetails.id,
@@ -181,7 +182,7 @@ export class PostgresUserRepository implements IUserRepository {
       agency: bd.agency,
       accountNumber: bd.accountNumber,
       accountType: bd.accountType,
-      balanceCents: bd.balanceCents,
+      balanceCents: bd.balance.toRaw(),
       updatedAt: bd.updatedAt,
     };
   }

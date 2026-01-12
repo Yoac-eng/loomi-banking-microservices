@@ -96,7 +96,7 @@ describe('TransactionsController', () => {
       id: '11111111-1111-1111-1111-111111111111',
       senderUserId: inputSenderUserId,
       receiverUserId: inputReceiverUserId,
-      amountCents: 1500,
+      amountCents: '1500',
       description: 'Lunch split',
       status: 'PENDING',
       idempotencyKey: inputIdempotencyKey,

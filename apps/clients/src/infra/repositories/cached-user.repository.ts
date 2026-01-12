@@ -5,6 +5,7 @@ import { User } from '../../domain/entities/user.entity';
 import { AccountType } from '../../domain/enum/account-type.enum';
 import type { ICache } from '../../domain/interfaces/repositories/cache/cache.provider.interface';
 import type { IUserRepository } from '../../domain/interfaces/repositories/user.repository.interface';
+import { Amount } from '../../domain/value-objects/amount.value-object';
 import { Email } from '../../domain/value-objects/email.value-object';
 
 // CachedUserRepository é um decorator que adiciona cache ao IUserRepository
@@ -126,7 +127,7 @@ export class CachedUserRepository implements IUserRepository {
                 agency: user.bankingDetails.agency,
                 accountNumber: user.bankingDetails.accountNumber,
                 accountType: user.bankingDetails.accountType,
-                balanceCents: user.bankingDetails.balanceCents,
+                balanceCents: user.bankingDetails.balance.toString(),
                 updatedAt: user.bankingDetails.updatedAt?.toISOString() ?? null,
               }
             : null,
@@ -168,7 +169,7 @@ export class CachedUserRepository implements IUserRepository {
           agency: cacheData.bankingDetails.agency,
           accountNumber: cacheData.bankingDetails.accountNumber,
           accountType: cacheData.bankingDetails.accountType,
-          balanceCents: cacheData.bankingDetails.balanceCents,
+          balance: Amount.fromString(cacheData.bankingDetails.balanceCents),
           updatedAt: cacheData.bankingDetails.updatedAt
             ? new Date(cacheData.bankingDetails.updatedAt)
             : undefined,
@@ -213,7 +214,7 @@ interface UserCacheData {
     agency: string;
     accountNumber: string;
     accountType: AccountType;
-    balanceCents: number;
+    balanceCents: string;
     updatedAt: string | null;
   } | null;
 }

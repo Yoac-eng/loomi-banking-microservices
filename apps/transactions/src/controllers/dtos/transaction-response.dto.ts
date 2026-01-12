@@ -15,8 +15,8 @@ export class TransactionResponseDto {
   @ApiProperty({ format: 'uuid' })
   public readonly receiverUserId!: string;
 
-  @ApiProperty({ type: Number, example: 1500 })
-  public readonly amountCents!: number;
+  @ApiProperty({ type: String, example: '1500' })
+  public readonly amountCents!: string;
 
   @ApiProperty({ type: String, required: false, nullable: true })
   public readonly description?: string | null;

@@ -1,13 +1,14 @@
 import { randomUUID } from 'crypto';
 
 import { AccountType } from '../enum/account-type.enum';
+import { Amount } from '../value-objects/amount.value-object';
 
 interface BankingDetailsProps {
   userId: string;
   agency: string;
   accountNumber: string;
   accountType: AccountType;
-  balanceCents: number;
+  balance: Amount;
   updatedAt?: Date;
 }
 
@@ -40,8 +41,12 @@ export class BankingDetails {
     return this._props.accountType;
   }
 
-  get balanceCents(): number {
-    return this._props.balanceCents;
+  get balance(): Amount {
+    return this._props.balance;
+  }
+
+  get balanceCents(): bigint {
+    return this._props.balance.cents;
   }
 
   get updatedAt(): Date {
@@ -54,25 +59,27 @@ export class BankingDetails {
       agency: this._props.agency,
       accountNumber: this._props.accountNumber,
       accountType: this._props.accountType,
-      balanceCents: this._props.balanceCents,
+      balanceCents: this._props.balance.toString(),
       updatedAt: this.updatedAt,
     };
   }
 
-  credit(amountCents: number): void {
-    if (amountCents <= 0) throw new Error('Amount must be positive');
-
-    this._props.balanceCents += amountCents;
+  credit(amount: Amount): void {
+    if (amount.cents <= 0n) throw new Error('Amount must be positive');
+    this._props.balance = Amount.fromRaw(
+      this._props.balance.cents + amount.cents,
+    );
     this._props.updatedAt = new Date();
   }
 
-  debit(amountCents: number): void {
-    if (amountCents <= 0) throw new Error('Amount must be positive');
-
-    if (this._props.balanceCents < amountCents) {
+  debit(amount: Amount): void {
+    if (amount.cents <= 0n) throw new Error('Amount must be positive');
+    if (this._props.balance.cents < amount.cents) {
       throw new Error('Insufficient balance');
     }
-    this._props.balanceCents -= amountCents;
+    this._props.balance = Amount.fromRaw(
+      this._props.balance.cents - amount.cents,
+    );
     this._props.updatedAt = new Date();
   }
 

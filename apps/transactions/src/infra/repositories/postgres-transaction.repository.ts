@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { Transaction } from '../../domain/entities/transaction.entity';
 import { TransactionStatus } from '../../domain/enum/transaction-status.enum';
 import type { ITransactionRepository } from '../../domain/interfaces/repositories/transaction.repository.interface';
+import { Amount } from '../../domain/value-objects/amount.value-object';
 import { prisma } from '../lib/prisma';
 
 @Injectable()
@@ -79,7 +80,7 @@ export class PostgresTransactionRepository implements ITransactionRepository {
     id: string;
     senderUserId: string;
     receiverUserId: string;
-    amountCents: number;
+    amountCents: bigint;
     description: string | null;
     status: 'PENDING' | 'SUCCESS' | 'FAILED' | 'CANCELED';
     idempotencyKey: string;
@@ -90,7 +91,7 @@ export class PostgresTransactionRepository implements ITransactionRepository {
       {
         senderUserId: prismaTransaction.senderUserId,
         receiverUserId: prismaTransaction.receiverUserId,
-        amountCents: prismaTransaction.amountCents,
+        amount: Amount.fromRaw(prismaTransaction.amountCents),
         description: prismaTransaction.description,
         status: this.mapPrismaStatusToDomain(prismaTransaction.status),
         idempotencyKey: prismaTransaction.idempotencyKey,
@@ -106,7 +107,7 @@ export class PostgresTransactionRepository implements ITransactionRepository {
       id: transaction.id,
       senderUserId: transaction.senderUserId,
       receiverUserId: transaction.receiverUserId,
-      amountCents: transaction.amountCents,
+      amountCents: transaction.amount.toRaw(),
       description: transaction.description ?? undefined,
       status: this.mapDomainStatusToPrisma(transaction.status),
       idempotencyKey: transaction.idempotencyKey,

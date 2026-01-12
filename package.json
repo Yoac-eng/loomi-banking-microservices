@@ -22,13 +22,14 @@
     "test:e2e": "jest --config ./apps/loomi-back-challenge/test/jest-e2e.json",
     "db:clients:generate": "prisma generate --schema=apps/clients/prisma/schema.prisma",
     "db:clients:migrate:dev": "prisma migrate dev --config apps/clients/prisma.config.ts",
-    "db:clients:migrate:deploy": "prisma migrate deploy --schema=apps/clients/prisma/schema.prisma",
+    "db:clients:migrate:deploy": "prisma migrate deploy --config apps/clients/prisma.config.ts",
     "db:clients:studio": "prisma studio --schema=apps/clients/prisma/schema.prisma",
     "db:transactions:generate": "prisma generate --schema=apps/transactions/prisma/schema.prisma",
     "db:transactions:migrate:dev": "prisma migrate dev --config apps/transactions/prisma.config.ts",
-    "db:transactions:migrate:deploy": "prisma migrate deploy --schema=apps/transactions/prisma/schema.prisma",
+    "db:transactions:migrate:deploy": "prisma migrate deploy --config apps/transactions/prisma.config.ts",
     "db:transactions:studio": "prisma studio --schema=apps/transactions/prisma/schema.prisma",
-    "docker:database:up": "docker-compose up -d postgres-clients postgres-transactions redis rabbitmq"
+    "docker:database:up": "docker-compose up -d postgres-clients postgres-transactions redis rabbitmq",
+    "docker:all:up": "docker-compose up -d --build"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.966.0",

@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { LedgerEntry } from '../../domain/entities/ledger-entry.entity';
 import { LedgerEntryType } from '../../domain/enum/ledger-entry-type.enum';
 import type { ILedgerEntryRepository } from '../../domain/interfaces/repositories/ledger-entry.repository.interface';
+import { Amount } from '../../domain/value-objects/amount.value-object';
 import { prisma } from '../lib/prisma';
 
 @Injectable()
@@ -80,7 +81,7 @@ export class PostgresLedgerEntryRepository implements ILedgerEntryRepository {
     id: string;
     bankingId: string;
     transactionId: string;
-    amountCents: number;
+    amountCents: bigint;
     type: 'CREDIT' | 'DEBIT';
     description: string | null;
     createdAt: Date;
@@ -89,7 +90,7 @@ export class PostgresLedgerEntryRepository implements ILedgerEntryRepository {
       {
         bankingId: prismaEntry.bankingId,
         transactionId: prismaEntry.transactionId,
-        amountCents: prismaEntry.amountCents,
+        amount: Amount.fromRaw(prismaEntry.amountCents),
         type:
           prismaEntry.type === 'CREDIT'
             ? LedgerEntryType.CREDIT
@@ -106,7 +107,7 @@ export class PostgresLedgerEntryRepository implements ILedgerEntryRepository {
       id: ledgerEntry.id,
       bankingId: ledgerEntry.bankingId,
       transactionId: ledgerEntry.transactionId,
-      amountCents: ledgerEntry.amountCents,
+      amountCents: ledgerEntry.amount.toRaw(),
       type: ledgerEntry.type,
       description: ledgerEntry.description ?? undefined,
       createdAt: ledgerEntry.createdAt,
