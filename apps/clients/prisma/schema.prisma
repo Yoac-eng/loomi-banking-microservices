@@ -38,7 +38,7 @@ model BankingDetails {
   userId        String   @unique @map("user_id") @db.Uuid
   agency        String   @db.VarChar
   accountNumber String   @map("account_number") @db.VarChar
-  balanceCents  Int      @default(0) @map("balance_cents")
+  balanceCents  BigInt   @default(0) @map("balance_cents")
   accountType   AccountType @map("account_type")
   updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
 
@@ -53,7 +53,7 @@ model LedgerEntry {
   id            String          @id @db.Uuid
   bankingId     String          @map("banking_id") @db.Uuid
   transactionId String          @map("transaction_id") @db.Uuid
-  amountCents   Int             @map("amount_cents")
+  amountCents   BigInt          @map("amount_cents")
   type          LedgerEntryType
   description   String?         @db.VarChar
   createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamp(6)

@@ -1,7 +1,7 @@
 export interface UserBankingInfo {
   id: string;
   bankingDetails: {
-    balanceCents: number;
+    balanceCents: bigint;
     accountNumber: string;
     agency: string;
   } | null;

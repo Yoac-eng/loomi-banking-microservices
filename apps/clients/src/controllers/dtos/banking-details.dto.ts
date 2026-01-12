@@ -18,8 +18,8 @@ export class BankingDetailsDto {
   @ApiProperty({ enum: AccountType, example: AccountType.CHECKING })
   public readonly accountType!: AccountType;
 
-  @ApiProperty({ type: Number, example: 50000 })
-  public readonly balanceCents!: number;
+  @ApiProperty({ type: String, example: '50000' })
+  public readonly balanceCents!: string;
 
   @ApiProperty({ type: String, format: 'date-time' })
   public readonly updatedAt!: string;

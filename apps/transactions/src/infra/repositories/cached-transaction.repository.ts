@@ -4,6 +4,7 @@ import { Transaction } from '../../domain/entities/transaction.entity';
 import { TransactionStatus } from '../../domain/enum/transaction-status.enum';
 import type { ICache } from '../../domain/interfaces/repositories/cache/cache.provider.interface';
 import type { ITransactionRepository } from '../../domain/interfaces/repositories/transaction.repository.interface';
+import { Amount } from '../../domain/value-objects/amount.value-object';
 
 @Injectable()
 export class CachedTransactionRepository implements ITransactionRepository {
@@ -114,7 +115,7 @@ export class CachedTransactionRepository implements ITransactionRepository {
         id: transaction.id,
         senderUserId: transaction.senderUserId,
         receiverUserId: transaction.receiverUserId,
-        amountCents: transaction.amountCents,
+        amountCents: transaction.amount.toString(),
         description: transaction.description,
         status: transaction.status,
         idempotencyKey: transaction.idempotencyKey,
@@ -147,7 +148,7 @@ export class CachedTransactionRepository implements ITransactionRepository {
       {
         senderUserId: cacheData.senderUserId,
         receiverUserId: cacheData.receiverUserId,
-        amountCents: cacheData.amountCents,
+        amount: Amount.fromString(cacheData.amountCents),
         description: cacheData.description,
         status: cacheData.status,
         idempotencyKey: cacheData.idempotencyKey,
@@ -178,7 +179,7 @@ interface TransactionCacheData {
   id: string;
   senderUserId: string;
   receiverUserId: string;
-  amountCents: number;
+  amountCents: string;
   description: string | null;
   status: TransactionStatus;
   idempotencyKey: string;

@@ -95,7 +95,7 @@ describe('ClientsController', () => {
         agency: '0001',
         accountNumber: '123456-7',
         accountType: 'CHECKING',
-        balanceCents: 50000,
+        balanceCents: '50000',
         updatedAt: new Date('2026-01-11T12:00:00.000Z').toISOString(),
       },
     };

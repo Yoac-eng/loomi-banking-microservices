@@ -18,7 +18,7 @@ model Transaction {
   id              String            @id @db.Uuid
   senderUserId    String            @map("sender_user_id") @db.Uuid
   receiverUserId  String            @map("receiver_user_id") @db.Uuid
-  amountCents     Int               @map("amount_cents")
+  amountCents     BigInt            @map("amount_cents")
   description     String?           @db.Text
   status          TransactionStatus @default(PENDING)
   idempotencyKey  String            @unique @map("idempotency_key") @db.VarChar

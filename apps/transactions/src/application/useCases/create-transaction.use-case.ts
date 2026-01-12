@@ -10,6 +10,7 @@ import { TransactionStatus } from '../../domain/enum/transaction-status.enum';
 import type { IClientsServiceClient } from '../../domain/interfaces/http/clients-service-client.interface';
 import type { IBrokerMessagePublisher } from '../../domain/interfaces/messaging/broker-message-publisher.interface';
 import type { ITransactionRepository } from '../../domain/interfaces/repositories/transaction.repository.interface';
+import { Amount } from '../../domain/value-objects/amount.value-object';
 import { TransactionLifecycleLogger } from '../services/transaction-lifecycle-logger.service';
 
 @Injectable()
@@ -61,13 +62,8 @@ export class CreateTransactionUseCase {
       );
     }
 
-    console.log('sender', sender);
-    console.log('receiver', receiver);
-    console.log('data', data);
-    // Validate sufficient balance
-    const transactionAmountCents = data.amount; // Convert to cents
-    console.log('transactionAmountCents', transactionAmountCents);
-    if (sender.bankingDetails.balanceCents < transactionAmountCents) {
+    const transactionAmount = Amount.create(data.amount);
+    if (sender.bankingDetails.balanceCents < transactionAmount.cents) {
       throw new BadRequestException('Insufficient balance');
     }
 
@@ -75,7 +71,7 @@ export class CreateTransactionUseCase {
     const transaction = new Transaction({
       senderUserId: data.senderUserId,
       receiverUserId: data.receiverUserId,
-      amountCents: transactionAmountCents,
+      amount: transactionAmount,
       description: data.description ?? null,
       status: TransactionStatus.PENDING,
       idempotencyKey: data.idempotencyKey,
@@ -96,7 +92,7 @@ export class CreateTransactionUseCase {
       transactionId: transaction.id,
       senderUserId: data.senderUserId,
       receiverUserId: data.receiverUserId,
-      amountCents: transactionAmountCents,
+      amountCents: transactionAmount.toString(),
       idempotencyKey: data.idempotencyKey,
     });
 
