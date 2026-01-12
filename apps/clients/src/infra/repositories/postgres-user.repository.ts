@@ -17,6 +17,7 @@ export class PostgresUserRepository implements IUserRepository {
         id: data.id,
         fullName: data.fullName,
         email: data.email,
+        passwordHash: data.passwordHash ?? undefined,
         address: data.address ?? undefined,
         profilePictureUrl: data.profilePictureUrl ?? undefined,
         createdAt: data.createdAt,
@@ -101,6 +102,7 @@ export class PostgresUserRepository implements IUserRepository {
     id: string;
     fullName: string;
     email: string;
+    passwordHash: string | null;
     address: string | null;
     profilePictureUrl: string | null;
     createdAt: Date;
@@ -110,6 +112,7 @@ export class PostgresUserRepository implements IUserRepository {
       {
         fullName: prismaUser.fullName,
         email: new Email(prismaUser.email),
+        passwordHash: prismaUser.passwordHash,
         address: prismaUser.address,
         profilePictureUrl: prismaUser.profilePictureUrl,
         createdAt: prismaUser.createdAt,
@@ -123,6 +126,7 @@ export class PostgresUserRepository implements IUserRepository {
     id: string;
     fullName: string;
     email: string;
+    passwordHash: string | null;
     address: string | null;
     profilePictureUrl: string | null;
     createdAt: Date;
@@ -163,6 +167,7 @@ export class PostgresUserRepository implements IUserRepository {
       id: user.id,
       fullName: user.fullName,
       email: user.email.toString(),
+      passwordHash: user.passwordHash,
       address: user.address,
       profilePictureUrl: user.profilePictureUrl,
       updatedAt: user.updatedAt,

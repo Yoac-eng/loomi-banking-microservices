@@ -1,4 +1,5 @@
 import { Injectable, Inject, ConflictException } from '@nestjs/common';
+import { hash } from 'bcryptjs';
 
 import { BankingDetails } from '../../domain/entities/banking-details.entity';
 import { User } from '../../domain/entities/user.entity';
@@ -24,10 +25,12 @@ export class CreateUserUseCase {
       throw new ConflictException('User with this email already exists');
     }
 
+    const passwordHash = await hash(data.password, 10);
     const emailValueObject = new Email(data.email);
     const user = new User({
       fullName: data.fullName,
       email: emailValueObject,
+      passwordHash,
       address: data.address ?? null,
       profilePictureUrl: data.profilePictureUrl ?? null,
     });

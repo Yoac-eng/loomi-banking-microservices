@@ -64,6 +64,7 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       CLIENTS_PORT: ${CLIENTS_PORT:-3000}
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret}
       DATABASE_URL_CLIENTS: postgresql://${POSTGRES_USER:-loomi}:${POSTGRES_PASSWORD:-loomi123}@postgres-clients:5432/${POSTGRES_DB_CLIENTS:-loomi_clients}
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -90,6 +91,7 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       port: ${TRANSACTIONS_PORT:-3001}
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret}
       DATABASE_URL_TRANSACTIONS: postgresql://${POSTGRES_USER:-loomi}:${POSTGRES_PASSWORD:-loomi123}@postgres-transactions:5432/${POSTGRES_DB_TRANSACTIONS:-loomi_transactions}
       REDIS_HOST: redis
       REDIS_PORT: 6379

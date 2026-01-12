@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { ZodExceptionFilter } from './common/filters/zod-exception.filter';
 import { RMQ_CONFIG } from './infra/messaging/rmq.config';
@@ -8,6 +9,14 @@ import { TransactionsModule } from './transactions.module';
 async function bootstrap() {
   const app = await NestFactory.create(TransactionsModule);
   app.useGlobalFilters(new ZodExceptionFilter());
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Transactions Service API')
+    .setDescription('HTTP API for creating and querying transfers.')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('docs', app, swaggerDocument);
 
   app.connectMicroservice({
     transport: Transport.RMQ,
